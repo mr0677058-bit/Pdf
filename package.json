@@ -1,0 +1,25 @@
+{
+  "name": "pdf-suite",
+  "version": "1.0.0",
+  "description": "25-Feature Polyglot Document Matrix",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "./build.sh"
+  },
+  "keywords": [
+    "pdf",
+    "polyglot",
+    "matrix",
+    "microservice"
+  ],
+  "author": "System Architect",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.5",
+    "qrcode": "^1.5.3"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+npm-cache/
+uploads/
+rust_engine/target/
+pdf_engine
+OfficeForge/Program.exe
+.env
