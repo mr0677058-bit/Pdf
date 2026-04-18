@@ -23,32 +23,45 @@ app.post('/api/process', upload.array('files'), async (req, res) => {
 
         console.log(`[GATEWAY] Routing task: [${action.toUpperCase()}]`);
 
-        // 1. C++ ENGINE
+        // ========================================================
+        // 1. C++ ENGINE (Hardware Level Processing)
+        // ========================================================
         if (['encrypt', 'decrypt', 'compress', 'grayscale'].includes(action)) {
             outputPath += '.pdf';
             execSync(`./pdf_engine ${action} "${inputPath}" "${outputPath}" "${param || password}"`);
         }
-        // 2. C# MONO ENGINE
-        else if (['word', 'pptx'].includes(action)) {
-            const exts = { word: '.docx', pptx: '.pptx' };
-            outputPath += exts[action]; outputName = `Document${exts[action]}`;
-            execSync(`mono OfficeForge/Program.exe ${action} "${inputPath}" "${outputPath}"`);
+        // FEATURE 26: DECOMPRESS (Hardware Level Native Integration)
+        else if (action === 'decompress') {
+            outputPath += '.pdf';
+            execSync(`qpdf --stream-data=uncompress "${inputPath}" "${outputPath}"`);
         }
-        // 3. PYTHON AI CORE
-        else if (['ocr', 'excel', 'extract_text', 'pdf2img', 'redact', 'summary', 'html'].includes(action)) {
-            const exts = { ocr: '.txt', excel: '.xlsx', extract_text: '.txt', pdf2img: '.zip', redact: '.pdf', summary: '.txt', html: '.html' };
-            outputPath += exts[action]; outputName = `Document${exts[action]}`;
+        
+        // ========================================================
+        // 2. PYTHON AI CORE (Data Science, Conversion & Vision)
+        // Note: Word and PPTX are now accurately mapped via Python
+        // ========================================================
+        else if (['ocr', 'excel', 'extract_text', 'pdf2img', 'redact', 'summary', 'html', 'word', 'pptx'].includes(action)) {
+            const exts = { ocr: '.txt', excel: '.xlsx', extract_text: '.txt', pdf2img: '.zip', redact: '.pdf', summary: '.txt', html: '.html', word: '.docx', pptx: '.pptx' };
+            outputPath += exts[action]; 
+            outputName = `Processed_Document${exts[action]}`;
             execSync(`python3 vision.py ${action} "${inputPath}" "${outputPath}"`);
         }
-        // 4. RUST ASSASSIN
+        
+        // ========================================================
+        // 3. RUST ASSASSIN (Binary Payload Injection)
+        // ========================================================
         else if (['sign', 'steg'].includes(action)) {
             outputPath += '.pdf';
             execSync(`./rust_engine/target/release/rust_engine ${action} "${inputPath}" "${outputPath}" "${param}"`);
         }
-        // 5. NODE.JS V8 ENGINE
+        
+        // ========================================================
+        // 4. NODE.JS V8 ENGINE (Memory-Safe Manipulation)
+        // ========================================================
         else {
             outputPath += '.pdf';
             let finalPdfBytes;
+            
             if (action === 'merge') {
                 const mergedPdf = await PDFDocument.create();
                 for (const file of req.files) {
@@ -58,7 +71,7 @@ app.post('/api/process', upload.array('files'), async (req, res) => {
                 }
                 finalPdfBytes = await mergedPdf.save();
             } 
-            else if (action === 'qr') { // FEATURE 24: QR TRACKER
+            else if (action === 'qr') { 
                 const pdf = await PDFDocument.load(fs.readFileSync(inputPath));
                 const qrDataUrl = await QRCode.toDataURL(param);
                 const qrImage = await pdf.embedPng(Buffer.from(qrDataUrl.split(',')[1], 'base64'));
@@ -130,13 +143,19 @@ app.post('/api/process', upload.array('files'), async (req, res) => {
     }
 });
 
-// SYSTEM ANCHOR
-const PORT = 3000;
+// =================================================================
+// SYSTEM ANCHOR: Enforces loop persistence in Android environments
+// =================================================================
+
+const PORT = process.env.PORT || 7860;
 const HOST = '0.0.0.0';
+
 const server = app.listen(PORT, HOST, () => {
     console.log(`\n======================================================`);
-    console.log(`[SYSTEM] 25-Feature Polyglot Matrix Active`);
-    console.log(`[SYSTEM] C++ | C# | RUST | PYTHON | NODEJS`);
+    console.log(`[SYSTEM] 26-Feature Polyglot Matrix Active`);
+    console.log(`[SYSTEM] C++ | RUST | PYTHON | NODEJS`);
+    console.log(`[SYSTEM] Engine permanently anchored. Event loop locked.`);
     console.log(`======================================================\n`);
 });
+
 setInterval(() => {}, 1000 * 60 * 60); 
